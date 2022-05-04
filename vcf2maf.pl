@@ -192,7 +192,7 @@ unless( @ARGV and $ARGV[0] =~ m/^-/ ) {
 }
 
 # Parse options and print usage if there is a syntax error, or if usage was explicitly requested
-my ( $man, $help, $verbose ) = ( 0, 0, 0 );
+my ( $man, $help, $verbose, $vep_stats ) = ( 0, 0, 0, 0 );
 my ( $input_vcf, $output_maf, $tmp_dir, $custom_enst_file );
 my ( $vcf_tumor_id, $vcf_normal_id, $remap_chain );
 my ( $samtools, $tabix, $liftover ) ;
@@ -214,6 +214,7 @@ GetOptions(
     'vep-custom=s' => \$vep_custom,
     'vep-config=s' => \$vep_config,
     'vep-overwrite!' => \$vep_overwrite,
+    'vep-stats!' => \$vep_stats,
     'buffer-size=i' => \$buffer_size,
     'any-allele!' => \$any_allele,
     'inhibit-vep!' => \$inhibit_vep,
@@ -457,7 +458,8 @@ unless( $inhibit_vep ) {
     # Contruct VEP command using some default options and run it
     my $vep_cmd = "$perl_bin $vep_script --species $species --assembly $ncbi_build";
     $vep_cmd .= " --no_progress" unless( $verbose );
-    $vep_cmd .= " --no_stats --buffer_size $buffer_size --sift b --ccds";
+    $vep_cmd .= " --no_stats" unless( $vep_stats );
+    $vep_cmd .= " --buffer_size $buffer_size --sift b --ccds";
     $vep_cmd .= " --uniprot --hgvs --symbol --numbers --domains --gene_phenotype --canonical";
     $vep_cmd .= " --protein --biotype --uniprot --tsl --variant_class --shift_hgvs 1";
     $vep_cmd .= " --check_existing --total_length --allele_number --no_escape --xref_refseq";
@@ -1334,6 +1336,10 @@ Number of forked processes to use when running VEP [4]
 =item B<--vep-overwrite>
 
 Allow VEP to overwrite annotated output (if it exists)
+
+=item B<--vep-stats>
+
+Generate VEP stats
 
 =item B<--buffer-size>=I<N>
 
